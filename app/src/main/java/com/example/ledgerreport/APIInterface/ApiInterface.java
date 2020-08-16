@@ -1,5 +1,6 @@
 package com.example.ledgerreport.APIInterface;
 import com.example.ledgerreport.Models.LedgerReportModel;
+import com.example.ledgerreport.Models.UserLoginModel;
 import com.example.ledgerreport.Utils.CONST;
 import java.util.List;
 
@@ -14,5 +15,12 @@ public interface ApiInterface {
             @Query("AC_NO") String AC_NO,
             @Query("FROM_DATE") String FROM_DATE,
             @Query("TO_DATE") String TO_DATE
+    );
+
+    @GET(CONST.USER_LOGIN)
+    Call<List<UserLoginModel>> userLogin(
+            @Query("Code") int Code,
+            @Query("Username") String Username,
+            @Query("Password") String Password
     );
 }

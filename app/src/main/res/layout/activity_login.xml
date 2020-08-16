@@ -111,7 +111,7 @@
                         android:layout_marginTop="5dp"
                         android:background="@drawable/et_bg"
                         android:fontFamily="sans-serif-light"
-                        android:inputType="date"
+                        android:inputType="text"
                         android:paddingLeft="15dp"
                         android:paddingRight="15dp"
                         android:singleLine="true"
