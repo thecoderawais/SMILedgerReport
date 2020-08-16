@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">LedgerReport</string>
+    <string name="txtAccCode">Account Code:</string>
+    <string name="txtFromDate">"From: "</string>
+    <string name="txtToDate">"To: "</string>
+    <string name="txtFetch">Fetch</string>
+    <string name="txtFetchDetails">Fetch Ledger:</string>
+    <string name="txtContentDescription">Logo Image</string>
+    <string name="txtLogTag">lrmLog</string>
+    <string name="txtToDateText">2020-04-20</string>
+    <string name="txtFromDateText">2020-02-20</string>
+    <string name="txtAccCodeText">27003</string>
+    <string name="dialog_message">Ledger Report Created Successfully! Select further Action.</string>
+    <string name="dialog_title">Done</string>
+    <string name="txtLogin">Login</string>
+    <string name="txtCode">Code:</string>
+    <string name="txtUsername">Username</string>
+    <string name="txtPassword">Password</string>
+</resources>
