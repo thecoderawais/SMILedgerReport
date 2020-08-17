@@ -1,12 +1,7 @@
 package com.example.ledgerreport;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -17,9 +12,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.pdf.PdfDocument;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.print.PrintAttributes;
 import android.print.PrintDocumentAdapter;
@@ -30,19 +23,20 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+
 import com.example.ledgerreport.APIInterface.ApiInterface;
 import com.example.ledgerreport.Models.LedgerReportModel;
 import com.example.ledgerreport.Utils.CONST;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.text.DateFormat;
-import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -65,17 +59,17 @@ public class MainActivity extends AppCompatActivity {
     ApiInterface apiInterface;
 
 
-    PdfDocument doc = new PdfDocument();
     Paint paint = new Paint(), titlePaint = new Paint();
     Bitmap bmp, scaledBmp;
     int pageWidth = 1200, rowYAxis = 760;
     Date dateObj;
-    DateFormat format;
+//    DateFormat format;
 
-    PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(1200,2010,1).create();
-    PdfDocument.Page page1 = doc.startPage(pageInfo);
+    PdfDocument doc = new PdfDocument();
+    PdfDocument.PageInfo pageInfo;
+    PdfDocument.Page page1;
 
-    Canvas canvas = page1.getCanvas();
+    Canvas canvas;
 
 //    @SuppressLint("SimpleDateFormat")
 //    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");
@@ -92,6 +86,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        pageInfo = new PdfDocument.PageInfo.Builder(1200,2010,1).create();
+        page1 = doc.startPage(pageInfo);
+        canvas = page1.getCanvas();
 
         ledgerReportsList = new ArrayList<>();
 
@@ -315,10 +313,35 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //Called each time for adding the row.
+    @SuppressLint("SimpleDateFormat")
     public void addRow(LedgerReportModel ledgerEntry)
     {
-         try {
+         if(rowYAxis <= 2000){ //If page is filled.
+             try {
 //            canvas.drawText(String.valueOf(ledgerEntry.getV_DATE()), 40, rowYAxis, paint); //Date
+                 paint.setTextSize(30f);
+                 paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
+                 try {
+                     canvas.drawText(new SimpleDateFormat("dd-MM-yy").format(ledgerEntry.getV_DATE()), 40, rowYAxis, paint); //Date
+                 }catch (Exception e){
+                     canvas.drawText("Date Error", 40, rowYAxis, paint); //Date
+                 }
+                 canvas.drawText(ledgerEntry.getV_NO(), 180, rowYAxis, paint); //V No
+                 canvas.drawText(ledgerEntry.getDESCRIPTION(), 280, rowYAxis, paint); //Description
+                 canvas.drawText(String.valueOf(ledgerEntry.getVDEBIT()), 620, rowYAxis, paint); //Debit
+                 canvas.drawText(String.valueOf(ledgerEntry.getV_CREDIT()), 820, rowYAxis, paint); //Credit
+                 canvas.drawText(String.valueOf(ledgerEntry.getBALANCE()), 1020, rowYAxis, paint); //Balance
+
+             }catch (Exception e){
+                 Log.d(getString(R.string.txtLogTag), "Exception while adding Row: " + e.getMessage());
+             }
+         }else{ //If the page's height has been filled!
+             pageInfo = new PdfDocument.PageInfo.Builder(1200,2010,1).create();
+             page1 = doc.startPage(pageInfo);
+             canvas = page1.getCanvas();
+
+             rowYAxis = 500;
+
              paint.setTextSize(30f);
              paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
              try {
@@ -331,11 +354,8 @@ public class MainActivity extends AppCompatActivity {
              canvas.drawText(String.valueOf(ledgerEntry.getVDEBIT()), 620, rowYAxis, paint); //Debit
              canvas.drawText(String.valueOf(ledgerEntry.getV_CREDIT()), 820, rowYAxis, paint); //Credit
              canvas.drawText(String.valueOf(ledgerEntry.getBALANCE()), 1020, rowYAxis, paint); //Balance
-
-            rowYAxis += 80;
-        }catch (Exception e){
-            Log.d(getString(R.string.txtLogTag), "Exception while adding Row: " + e.getMessage());
-        }
+         }
+        rowYAxis += 80;
     }
 
     private void printPDF(String fileName) {
