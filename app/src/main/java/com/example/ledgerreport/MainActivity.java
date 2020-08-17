@@ -340,7 +340,7 @@ public class MainActivity extends AppCompatActivity {
              page1 = doc.startPage(pageInfo);
              canvas = page1.getCanvas();
 
-             rowYAxis = 500;
+             rowYAxis = 150;
 
              paint.setTextSize(30f);
              paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
