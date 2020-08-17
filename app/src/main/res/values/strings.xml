@@ -7,7 +7,7 @@
     <string name="txtFetchDetails">Fetch Ledger:</string>
     <string name="txtContentDescription">Logo Image</string>
     <string name="txtLogTag">lrmLog</string>
-    <string name="txtToDateText">2020-04-20</string>
+    <string name="txtToDateText">2020–04-20</string>
     <string name="txtFromDateText">2020-02-20</string>
     <string name="txtAccCodeText">27003</string>
     <string name="dialog_message">Ledger Report Created Successfully! Select further Action.</string>
@@ -16,4 +16,9 @@
     <string name="txtCode">Code:</string>
     <string name="txtUsername">Username</string>
     <string name="txtPassword">Password</string>
+    <string name="section_format">Section : %1$d</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="account">Account:</string>
+    <string name="click_to_pick_date">Click To Pick Date</string>
 </resources>

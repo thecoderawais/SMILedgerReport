@@ -159,6 +159,7 @@
             </LinearLayout>
 
             <Button
+                android:id="@+id/btnLogin"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
                 android:layout_below="@+id/linlay1"
@@ -166,14 +167,13 @@
                 android:layout_marginTop="50dp"
                 android:background="@drawable/btn_bg"
                 android:fontFamily="sans-serif-medium"
+                android:onClick="login"
                 android:paddingLeft="70dp"
                 android:paddingRight="70dp"
                 android:text="@string/txtLogin"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
-                android:textSize="16sp"
-                android:onClick="login"
-                />
+                android:textSize="16sp" />
 
         </RelativeLayout>
 
