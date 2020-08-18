@@ -1,5 +1,6 @@
 package com.example.ledgerreport.APIInterface;
 import com.example.ledgerreport.Models.LedgerReportModel;
+import com.example.ledgerreport.Models.TbAccountsModel;
 import com.example.ledgerreport.Models.UserLoginModel;
 import com.example.ledgerreport.Utils.CONST;
 import java.util.List;
@@ -23,4 +24,7 @@ public interface ApiInterface {
             @Query("Username") String Username,
             @Query("Password") String Password
     );
+
+    @GET(CONST.READ_TBACCOUNTS)
+    Call<List<TbAccountsModel>> getAllTbAccounts();
 }

@@ -89,7 +89,7 @@ public class LoginActivity extends AppCompatActivity {
                             if (response.isSuccessful() && response.body() != null) {
                                 if (response.body().get(0).isActive()) {
                                     Toast.makeText(LoginActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
-                                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                                    startActivity(new Intent(LoginActivity.this, LedgerSelectActivity.class));
                                     Log.d(getString(R.string.txtLogTag), "User Logged in!");
                                 } else {
                                     Toast.makeText(LoginActivity.this, "Sorry, but your account is not activated!", Toast.LENGTH_SHORT).show();
