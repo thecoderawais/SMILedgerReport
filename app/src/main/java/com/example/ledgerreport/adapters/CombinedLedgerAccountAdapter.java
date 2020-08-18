@@ -1,0 +1,49 @@
+package com.example.ledgerreport.adapters;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import com.example.ledgerreport.R;
+import com.jaredrummler.materialspinner.MaterialSpinner;
+
+import java.util.ArrayList;
+
+import androidx.recyclerview.widget.RecyclerView;
+
+public class CombinedLedgerAccountAdapter extends RecyclerView.Adapter<CombinedLedgerAccountAdapter.ViewHolder> {
+
+    private ArrayList<String> accounts;
+    private LayoutInflater mInflater;
+
+    public CombinedLedgerAccountAdapter(Context context, ArrayList<String> accounts) {
+        this.mInflater = LayoutInflater.from(context);
+        this.accounts = accounts;
+    }
+
+    @Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = mInflater.inflate(R.layout.account_spinner_layout, parent, false);
+        return new ViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        String array[] = {"1","2","3","4","5"};
+        holder.spinner.setItems(array);
+    }
+
+    @Override
+    public int getItemCount() {
+        return accounts.size();
+    }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+
+        MaterialSpinner spinner = itemView.findViewById(R.id.combinedLedgerSpinner);
+        ViewHolder(View itemView) {
+            super(itemView);
+        }
+    }
+}
