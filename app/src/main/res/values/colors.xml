@@ -6,8 +6,8 @@
 
     <color name="white">#FFFFFF</color>
     <color name="transparent">#00000000</color>
-    <color name="gradStart">#B7695C</color>
-    <color name="gradStop">#F7E7C6</color>
+    <color name="gradStart">#DA4453</color>
+    <color name="gradStop">#89216B</color>
     <color name="grey_10">#e6e6e6</color>
 
 </resources>

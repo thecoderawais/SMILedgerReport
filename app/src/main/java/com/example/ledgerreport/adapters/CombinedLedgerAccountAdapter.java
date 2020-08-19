@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.ledgerreport.APIInterface.ApiInterface;
 import com.example.ledgerreport.R;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 
@@ -30,8 +31,7 @@ public class CombinedLedgerAccountAdapter extends RecyclerView.Adapter<CombinedL
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        String array[] = {"1","2","3","4","5"};
-        holder.spinner.setItems(array);
+        holder.spinner.setItems(accounts);
     }
 
     @Override

@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.example.ledgerreport.APIInterface.ApiInterface;
 import com.example.ledgerreport.Models.UserLoginModel;
 import com.example.ledgerreport.Utils.CONST;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.List;
 
@@ -88,8 +89,14 @@ public class LoginActivity extends AppCompatActivity {
                         try {
                             if (response.isSuccessful() && response.body() != null) {
                                 if (response.body().get(0).isActive()) {
+                                    Intent intent = new Intent(LoginActivity.this, LedgerSelectActivity.class);
+                                    intent.putExtra("CompanyName",
+                                            response.body().get(0).getOwnerName() + response.body().get(0).getUsername());
+                                    Log.d(getString(R.string.txtLogTag), response.toString());
+
+                                    startActivity(intent);
                                     Toast.makeText(LoginActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
-                                    startActivity(new Intent(LoginActivity.this, LedgerSelectActivity.class));
+                                    Snackbar.make(getCurrentFocus(), "Clicked ", Snackbar.LENGTH_LONG).show();
                                     Log.d(getString(R.string.txtLogTag), "User Logged in!");
                                 } else {
                                     Toast.makeText(LoginActivity.this, "Sorry, but your account is not activated!", Toast.LENGTH_SHORT).show();

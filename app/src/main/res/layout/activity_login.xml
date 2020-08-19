@@ -82,7 +82,9 @@
                         android:textColor="@color/white"
                         android:textSize="15sp"
                         android:inputType="number"
-                        android:autofillHints="@string/txtAccCode" />
+                        android:autofillHints="@string/txtAccCode"
+                        android:text="5027"/>
+
 
                 </LinearLayout>
 
@@ -117,7 +119,8 @@
                         android:singleLine="true"
                         android:textColor="@color/white"
                         android:textSize="15sp"
-                        android:importantForAutofill="no"/>
+                        android:importantForAutofill="no"
+                        android:text="awais"/>
 
                 </LinearLayout>
 
@@ -152,7 +155,8 @@
                         android:singleLine="true"
                         android:textColor="@color/white"
                         android:textSize="15sp"
-                        android:importantForAutofill="no"/>
+                        android:importantForAutofill="no"
+                        android:text="12345678"/>
 
                 </LinearLayout>
 

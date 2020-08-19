@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+public
 class PDFDocumentAdapter extends PrintDocumentAdapter {
     Context context;
     String path;
