@@ -21,7 +21,6 @@ import java.util.Objects;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -36,16 +35,6 @@ public class TrialBalance extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(CONST.BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        accounts = new ArrayList<>();
-
-        apiInterface = retrofit.create(ApiInterface.class);
-        getAllAccounts();
     }
 
     @Override
@@ -58,6 +47,16 @@ public class TrialBalance extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(CONST.BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        accounts = new ArrayList<>();
+
+        apiInterface = retrofit.create(ApiInterface.class);
+        getAllAccounts();
 
         MaterialSpinner spinner = (MaterialSpinner) Objects.requireNonNull(getActivity())
                 .findViewById(R.id.trialBalanceSpinner);

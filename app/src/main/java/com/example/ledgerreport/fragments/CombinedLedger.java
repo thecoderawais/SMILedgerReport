@@ -13,8 +13,6 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.ledgerreport.APIInterface.ApiInterface;
-import com.example.ledgerreport.LedgerSelectActivity;
-import com.example.ledgerreport.MainActivity;
 import com.example.ledgerreport.Models.LedgerReportModel;
 import com.example.ledgerreport.Models.TbAccountsModel;
 import com.example.ledgerreport.R;
@@ -32,7 +30,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -41,13 +38,13 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class CombinedLedger extends Fragment {
 
-    String fileName = "";
-    List<LedgerReportModel> ledgerReportsList;
-
-
+    private String fileName = "";
+    private List<LedgerReportModel> ledgerReportsList;
+    private CombinedLedgerAccountAdapter adapter;
     private int count = 1;
     private ArrayList<String> accounts;
-    ApiInterface apiInterface;
+    private ArrayList<String> spinnerAccounts;
+    private ApiInterface apiInterface;
     private FloatingActionButton fab;
 
     Paint paint = new Paint(), titlePaint = new Paint();
@@ -65,7 +62,21 @@ public class CombinedLedger extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
 
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_combined_ledger, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        spinnerAccounts = new ArrayList<>();
+        accounts = new ArrayList<>();
+        accounts.add(String.valueOf(count));
         pageInfo = new PdfDocument.PageInfo.Builder(1200,2010,1).create();
         page1 = doc.startPage(pageInfo);
         canvas = page1.getCanvas();
@@ -82,25 +93,11 @@ public class CombinedLedger extends Fragment {
         scaledBmp = Bitmap.createScaledBitmap(bmp, 800, 350, false);
         dateObj = new Date();
 
-        accounts = new ArrayList<>();
 
         apiInterface = retrofit.create(ApiInterface.class);
         getAllAccounts();
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_combined_ledger, container, false);
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        accounts = new ArrayList<>();
         fab = Objects.requireNonNull(getActivity()).findViewById(R.id.floatingActionButton);
-        final CombinedLedgerAccountAdapter adapter = new CombinedLedgerAccountAdapter(getContext(), accounts);
+        adapter = new CombinedLedgerAccountAdapter(getContext(), accounts, spinnerAccounts);
         final RecyclerView recyclerView = Objects.requireNonNull(getActivity()).findViewById(R.id.combinedLedgerRecyclerView);
         recyclerView.setHasFixedSize(true);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
@@ -129,8 +126,9 @@ public class CombinedLedger extends Fragment {
                                 if (response.body().size() > 0) {
 //                                    Toast.makeText(getContext(), "Login Successful", Toast.LENGTH_SHORT).show();
                                     for(TbAccountsModel item : response.body()){
-                                        accounts.add(item.getAC_CODE() + " -- " + item.getAC_NAME());
+                                        spinnerAccounts.add(item.getAC_CODE() + " -- " + item.getAC_NAME());
                                     }
+                                    adapter.notifyDataSetChanged();
                                     Log.d(getString(R.string.txtLogTag), "User Logged in!");
                                 } else {
                                     Toast.makeText(getContext(), "Sorry, but your account is not activated!", Toast.LENGTH_SHORT).show();

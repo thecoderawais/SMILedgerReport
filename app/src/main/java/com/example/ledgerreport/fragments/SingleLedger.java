@@ -24,7 +24,6 @@ import android.widget.DatePicker;
 import android.widget.Toast;
 
 import com.example.ledgerreport.APIInterface.ApiInterface;
-import com.example.ledgerreport.MainActivity;
 import com.example.ledgerreport.Models.LedgerReportModel;
 import com.example.ledgerreport.Models.TbAccountsModel;
 import com.example.ledgerreport.PDFDocumentAdapter;
@@ -32,7 +31,6 @@ import com.example.ledgerreport.PdfViewActivity;
 import com.example.ledgerreport.R;
 import com.example.ledgerreport.Utils.CONST;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 
@@ -48,7 +46,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -87,6 +84,18 @@ public class SingleLedger extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_single_ledger, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
 
         pageInfo = new PdfDocument.PageInfo.Builder(1200,2010,1).create();
         page1 = doc.startPage(pageInfo);
@@ -108,23 +117,8 @@ public class SingleLedger extends Fragment {
 
         apiInterface = retrofit.create(ApiInterface.class);
         getAllAccounts();
-    }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_single_ledger, container, false);
-
-
-        // Inflate the layout for this fragment
-        return v;
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        MaterialSpinner spinner = (MaterialSpinner) Objects.requireNonNull(getActivity())
+        MaterialSpinner spinner = Objects.requireNonNull(getActivity())
                 .findViewById(R.id.singleLedgerSpinner);
         fromDate = Objects.requireNonNull(getActivity()).findViewById(R.id.singleLedgerFromDate);
         toDate = Objects.requireNonNull(getActivity()).findViewById(R.id.singleLedgerToDate);
