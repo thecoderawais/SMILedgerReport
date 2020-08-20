@@ -1,5 +1,7 @@
 package com.example.ledgerreport.fragments;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -38,6 +40,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class CombinedLedger extends Fragment {
 
+    int selectedIndex, loggedInUser;
+
+    SharedPreferences sharedPreference;
+
     private String fileName = "";
     private List<LedgerReportModel> ledgerReportsList;
     private CombinedLedgerAccountAdapter adapter;
@@ -73,6 +79,9 @@ public class CombinedLedger extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        sharedPreference = Objects.requireNonNull(getActivity()).getPreferences(Context.MODE_PRIVATE);
+        loggedInUser = sharedPreference.getInt(getString(R.string.prefKey), 0);
 
         spinnerAccounts = new ArrayList<>();
         accounts = new ArrayList<>();
@@ -158,8 +167,9 @@ public class CombinedLedger extends Fragment {
     }
 
     //Retrofit API Data filling
-    public void getLedgerReportData(final String accCode, final String fromDate,  final String toDate){
-        Call<List<LedgerReportModel>> call = apiInterface.getLedgerReportData(accCode,  fromDate, toDate);
+    public void getLedgerReportData(final int compCode, final String accCode,
+                                    final String fromDate,  final String toDate){
+        Call<List<LedgerReportModel>> call = apiInterface.getLedgerReportData(compCode, accCode,  fromDate, toDate);
 
         if (call != null){
             try {

@@ -44,19 +44,19 @@ public class LedgerSelectActivity extends AppCompatActivity {
     }
 
     private void initToolbar() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_arrow_back);
         setSupportActionBar(toolbar);
-        Objects.requireNonNull(getSupportActionBar()).setTitle("Welcome! ");
+        Objects.requireNonNull(getSupportActionBar()).setTitle("Welcome, " + getIntent().getStringExtra("CompanyName"));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         Tools.setSystemBarColor(this);
     }
 
     private void initComponent() {
-        view_pager = (ViewPager) findViewById(R.id.view_pager);
+        view_pager = findViewById(R.id.view_pager);
         setupViewPager(view_pager);
 
-        tab_layout = (TabLayout) findViewById(R.id.tab_layout);
+        tab_layout = findViewById(R.id.tab_layout);
         tab_layout.setupWithViewPager(view_pager);
     }
 
@@ -95,7 +95,7 @@ public class LedgerSelectActivity extends AppCompatActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_ledger_select_tabs, container, false);
-            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
+            TextView textView = rootView.findViewById(R.id.section_label);
             assert getArguments() != null;
             textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
             return rootView;

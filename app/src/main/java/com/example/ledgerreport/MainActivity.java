@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -47,6 +48,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import static android.os.Environment.getExternalStorageDirectory;
 
 public class MainActivity extends AppCompatActivity {
+    int loggedInUser;
+
+    SharedPreferences sharedPreference;
+
     String fileName = "";
     List<LedgerReportModel> ledgerReportsList;
 
@@ -86,6 +91,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        sharedPreference = this.getPreferences(Context.MODE_PRIVATE);
+        loggedInUser = sharedPreference.getInt(getString(R.string.prefKey), 0);
 
         pageInfo = new PdfDocument.PageInfo.Builder(1200,2010,1).create();
         page1 = doc.startPage(pageInfo);
@@ -131,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
                 String fd = etFromDate.getText().toString(), td = etToDate.getText().toString();
 
                 Log.d(getString(R.string.txtLogTag), "Requesting API Data...");
-                getLedgerReportData(accCode, fd, td);
+                getLedgerReportData(loggedInUser, accCode, fd, td);
 
 //                while (ledgerReportsList.size() == 0){
 //                    Log.d(getString(R.string.txtLogTag), "Last Call Returned Zero Rows, Requesting Again.....");
@@ -227,8 +235,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //Retrofit API Data filling
-    public void getLedgerReportData(final String accCode, final String fromDate,  final String toDate){
-        Call<List<LedgerReportModel>> call = apiInterface.getLedgerReportData(accCode,  fromDate, toDate);
+    public void getLedgerReportData(final int compCode, final String accCode,
+                                    final String fromDate,  final String toDate){
+        Call<List<LedgerReportModel>> call = apiInterface.getLedgerReportData(compCode, accCode,  fromDate, toDate);
 
         if (call != null){
             try {

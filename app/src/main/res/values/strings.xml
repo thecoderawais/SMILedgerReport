@@ -7,8 +7,8 @@
     <string name="txtFetchDetails">Fetch Ledger:</string>
     <string name="txtContentDescription">Logo Image</string>
     <string name="txtLogTag">lrmLog</string>
-    <string name="txtToDateText">2020–04-20</string>
-    <string name="txtFromDateText">2020-02-20</string>
+    <string name="txtToDateText">2020–04–20</string>
+    <string name="txtFromDateText">2020–02–20</string>
     <string name="txtAccCodeText">27003</string>
     <string name="dialog_message">Ledger Report Created Successfully! Select further Action.</string>
     <string name="dialog_title">Done</string>
@@ -22,4 +22,6 @@
     <string name="account">Account:</string>
     <string name="accounts">Accounts:</string>
     <string name="click_to_pick_date">Click To Pick Date</string>
+    <string name="pref">LRPref</string>
+    <string name="prefKey">loginKey</string>
 </resources>

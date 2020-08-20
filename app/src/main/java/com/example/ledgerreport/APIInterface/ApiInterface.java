@@ -13,6 +13,7 @@ public interface ApiInterface {
 
     @GET(CONST.READ_LEDGER_REPORT_DATA)
     Call<List<LedgerReportModel>> getLedgerReportData(
+            @Query("V_C_NO") int V_C_NO,
             @Query("AC_NO") String AC_NO,
             @Query("FROM_DATE") String FROM_DATE,
             @Query("TO_DATE") String TO_DATE

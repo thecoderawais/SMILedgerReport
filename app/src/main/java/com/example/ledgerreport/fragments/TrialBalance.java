@@ -31,6 +31,7 @@ public class TrialBalance extends Fragment {
 
     ApiInterface apiInterface;
     ArrayList<String> accounts;
+    MaterialSpinner spinner;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -58,9 +59,7 @@ public class TrialBalance extends Fragment {
         apiInterface = retrofit.create(ApiInterface.class);
         getAllAccounts();
 
-        MaterialSpinner spinner = (MaterialSpinner) Objects.requireNonNull(getActivity())
-                .findViewById(R.id.trialBalanceSpinner);
-        spinner.setItems(accounts);
+        spinner = Objects.requireNonNull(getActivity()).findViewById(R.id.trialBalanceSpinner);
         spinner.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<String>() {
             @Override
             public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
@@ -77,19 +76,20 @@ public class TrialBalance extends Fragment {
                     public void onResponse(Call<List<TbAccountsModel>> call, Response<List<TbAccountsModel>> response) {
                         try {
                             if (response.isSuccessful() && response.body() != null) {
+                                Log.d(getString(R.string.txtLogTag), "Response Successful! Entries: " + response.body().size());
                                 if (response.body().size() > 0) {
 //                                    Toast.makeText(getContext(), "Login Successful", Toast.LENGTH_SHORT).show();
                                     for(TbAccountsModel item : response.body()){
                                         accounts.add(item.getAC_CODE() + " -- " + item.getAC_NAME());
                                     }
-                                    Log.d(getString(R.string.txtLogTag), "User Logged in!");
+                                    spinner.setItems(accounts);
+                                    Log.d(getString(R.string.txtLogTag), "Set " + response.body().size() + " entries in Spinner");
                                 } else {
-                                    Toast.makeText(getContext(), "Sorry, but your account is not activated!", Toast.LENGTH_SHORT).show();
-                                    Log.d(getString(R.string.txtLogTag), "Account not activated!");
+                                    Toast.makeText(getContext(), "No Accounts Found", Toast.LENGTH_SHORT).show();
                                 }
                             } else {
-                                Toast.makeText(getContext(), "Wrong Credentials!", Toast.LENGTH_SHORT).show();
-                                Log.d(getString(R.string.txtLogTag), "Response was not successful!");
+                                Toast.makeText(getContext(), "Response was not successful!", Toast.LENGTH_SHORT).show();
+                                Log.d(getString(R.string.txtLogTag), "Response was not successful!" + response.message() );
                             }
                         } catch (Exception e) {
                             Log.d(getString(R.string.txtLogTag), "Error while getting User's info: " + e.getMessage());
@@ -103,7 +103,7 @@ public class TrialBalance extends Fragment {
                     }
                 });
             } catch (Exception e) {
-                Log.d(getString(R.string.txtLogTag), "loginUser Exception: " + e.getMessage());
+                Log.d(getString(R.string.txtLogTag), "LedgerReportData Getting Exception: " + e.getMessage());
             }
         } else {
             Log.d(getString(R.string.txtLogTag), "Call was null");

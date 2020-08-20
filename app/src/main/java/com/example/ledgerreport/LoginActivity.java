@@ -1,6 +1,8 @@
 package com.example.ledgerreport;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -30,6 +32,8 @@ public class LoginActivity extends AppCompatActivity {
     Button btnLogin;
     ApiInterface apiInterface;
 
+    SharedPreferences sharedpreferences;
+
     RelativeLayout relativeLayout;
     Handler handler = new Handler();
     Runnable runnable = new Runnable() {
@@ -49,12 +53,7 @@ public class LoginActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.etPassword);
         btnLogin = findViewById(R.id.btnLogin);
 
-        btnLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(LoginActivity.this, LedgerSelectActivity.class));
-            }
-        });
+        sharedpreferences = getSharedPreferences(getString(R.string.pref), Context.MODE_PRIVATE);
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(CONST.BASE_URL)
@@ -72,14 +71,11 @@ public class LoginActivity extends AppCompatActivity {
         String username = etUsername.getText().toString(), password = etPassword.getText().toString();
         int code = Integer.parseInt(etCode.getText().toString());
         if (!username.isEmpty() && !password.isEmpty()) {
-            etCode.clearFocus();
-            etUsername.clearFocus();
-            etPassword.clearFocus();
-            loginUser(code, username, password);
+            loginUser(code, username, password, view);
         }
     }
 
-    public void loginUser(int code, String username, String password) {
+    public void loginUser(final int code, String username, String password,final View v) {
         Call<List<UserLoginModel>> call = apiInterface.userLogin(code, username, password);
         if (call != null) {
             try {
@@ -90,16 +86,20 @@ public class LoginActivity extends AppCompatActivity {
                             if (response.isSuccessful() && response.body() != null) {
                                 if (response.body().get(0).isActive()) {
                                     Intent intent = new Intent(LoginActivity.this, LedgerSelectActivity.class);
-                                    intent.putExtra("CompanyName",
-                                            response.body().get(0).getOwnerName() + response.body().get(0).getUsername());
+                                    String companyName = response.body().get(0).getOwnerName();
+                                    intent.putExtra("CompanyName", companyName);
                                     Log.d(getString(R.string.txtLogTag), response.toString());
 
+                                    SharedPreferences.Editor editor = sharedpreferences.edit();
+                                    editor.putInt(getString(R.string.prefKey), code);
+                                    editor.apply();
                                     startActivity(intent);
                                     Toast.makeText(LoginActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
-                                    Snackbar.make(getCurrentFocus(), "Clicked ", Snackbar.LENGTH_LONG).show();
+                                    Snackbar.make(v, "Welcome, " + response.body().get(0).getOwnerName(), Snackbar.LENGTH_LONG).show();
                                     Log.d(getString(R.string.txtLogTag), "User Logged in!");
                                 } else {
                                     Toast.makeText(LoginActivity.this, "Sorry, but your account is not activated!", Toast.LENGTH_SHORT).show();
+                                    Snackbar.make(v, "Account not activated!", Snackbar.LENGTH_LONG).show();
                                     Log.d(getString(R.string.txtLogTag), "Account not activated!");
                                 }
                             } else {
