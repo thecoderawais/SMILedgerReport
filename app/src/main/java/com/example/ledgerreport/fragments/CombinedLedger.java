@@ -45,7 +45,7 @@ public class CombinedLedger extends Fragment {
 
     SharedPreferences sharedPreference;
 
-    private String fileName = "";
+    private String fileName = "", whereClause = " WHERE AC_NO = ";
     private List<LedgerReportModel> ledgerReportsList;
     private CombinedLedgerAccountAdapter adapter;
     private int count = 1;
@@ -84,7 +84,9 @@ public class CombinedLedger extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        selectedAccounts = new ArrayList<>();
+        Log.d(getString(R.string.txtLogTag), "Started Combined Ledger Activity!");
+
+//        selectedAccounts = new ArrayList<>();
         selectedAccountsIndices = new ArrayList<>();
 
         btnSubmit = view.findViewById(R.id.btnSubmitCombinedLedger);
@@ -137,7 +139,14 @@ public class CombinedLedger extends Fragment {
                 selectedAccounts = adapter.getSelectedAccounts();
                 selectedAccountsIndices = adapter.getSelectedAccountsIndies();
 
-                Log.d(getString(R.string.txtLogTag), "Selected Accounts:  " + selectedAccounts.size());
+                Log.d(getString(R.string.txtLogTag), "Got " + selectedAccounts.size() + " Selected Accounts back...");
+                Log.d(getString(R.string.txtLogTag), "Showing Selected Accounts...");
+
+                for (String item :
+                        selectedAccounts) {
+                    Log.d(getString(R.string.txtLogTag), "Selected Accounts:  " + item);
+                }
+
                 Log.d(getString(R.string.txtLogTag), "Selected Accounts Indices:  " + selectedAccountsIndices.size());
             }
         });
@@ -200,7 +209,7 @@ public class CombinedLedger extends Fragment {
                             if (response.isSuccessful() && response.body() != null){
                                 ledgerReportsList.clear();
                                 ledgerReportsList.addAll(response.body());
-                                Log.d(getString(R.string.txtLogTag), "No of Entries Found: " + ledgerReportsList.size());
+//                                Log.d(getString(R.string.txtLogTag), "No of Entries Found: " + ledgerReportsList.size());
                             }else{
                                 Log.d(getString(R.string.txtLogTag), "Response was not successful!");
                             }

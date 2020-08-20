@@ -35,16 +35,26 @@ public class CombinedLedgerAccountAdapter extends RecyclerView.Adapter<CombinedL
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.spinner.setItems(spinnerAccounts);
 
         holder.spinner.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<String>() {
             @Override
             public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
-                selectedAccountsArray.add(item);
-                selectedAccountsIndices.add(position - 1);
+                int index = holder.getLayoutPosition();
+
+                if(selectedAccountsArray.size() >= index + 1){
+                    selectedAccountsArray.set(index, item);
+                    selectedAccountsIndices.set(index, index);
+                }else{
+                    selectedAccountsArray.add(item);
+                    selectedAccountsIndices.add(index);
+                }
+                accounts.remove(item);
             }
         });
+
+
     }
 
     @Override
