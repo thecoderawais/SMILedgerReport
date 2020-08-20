@@ -15,6 +15,7 @@ import android.widget.Toast;
 import com.example.ledgerreport.APIInterface.ApiInterface;
 import com.example.ledgerreport.Models.UserLoginModel;
 import com.example.ledgerreport.Utils.CONST;
+import com.example.ledgerreport.Utils.MySharedPreference;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.List;
@@ -31,8 +32,6 @@ public class LoginActivity extends AppCompatActivity {
     EditText etCode, etUsername, etPassword;
     Button btnLogin;
     ApiInterface apiInterface;
-
-    SharedPreferences sharedpreferences;
 
     RelativeLayout relativeLayout;
     Handler handler = new Handler();
@@ -52,8 +51,6 @@ public class LoginActivity extends AppCompatActivity {
         etUsername = findViewById(R.id.etUsername);
         etPassword = findViewById(R.id.etPassword);
         btnLogin = findViewById(R.id.btnLogin);
-
-        sharedpreferences = getSharedPreferences(getString(R.string.pref), Context.MODE_PRIVATE);
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(CONST.BASE_URL)
@@ -90,9 +87,9 @@ public class LoginActivity extends AppCompatActivity {
                                     intent.putExtra("CompanyName", companyName);
                                     Log.d(getString(R.string.txtLogTag), response.toString());
 
-                                    SharedPreferences.Editor editor = sharedpreferences.edit();
-                                    editor.putInt(getString(R.string.prefKey), code);
-                                    editor.apply();
+                                    new MySharedPreference(LoginActivity.this).saveCompanyCode("companyCode", code);
+                                    new MySharedPreference(LoginActivity.this).saveCompanyName("companyName", companyName);
+
                                     startActivity(intent);
                                     Toast.makeText(LoginActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
                                     Snackbar.make(v, "Welcome, " + response.body().get(0).getOwnerName(), Snackbar.LENGTH_LONG).show();

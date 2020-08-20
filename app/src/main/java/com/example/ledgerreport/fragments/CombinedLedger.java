@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.ledgerreport.APIInterface.ApiInterface;
@@ -49,9 +50,12 @@ public class CombinedLedger extends Fragment {
     private CombinedLedgerAccountAdapter adapter;
     private int count = 1;
     private ArrayList<String> accounts;
+    private ArrayList<String> selectedAccounts;
+    private ArrayList<Integer> selectedAccountsIndices;
     private ArrayList<String> spinnerAccounts;
     private ApiInterface apiInterface;
     private FloatingActionButton fab;
+    private Button btnSubmit;
 
     Paint paint = new Paint(), titlePaint = new Paint();
     Bitmap bmp, scaledBmp;
@@ -79,6 +83,11 @@ public class CombinedLedger extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        selectedAccounts = new ArrayList<>();
+        selectedAccountsIndices = new ArrayList<>();
+
+        btnSubmit = view.findViewById(R.id.btnSubmitCombinedLedger);
 
         sharedPreference = Objects.requireNonNull(getActivity()).getPreferences(Context.MODE_PRIVATE);
         loggedInUser = sharedPreference.getInt(getString(R.string.prefKey), 0);
@@ -119,6 +128,17 @@ public class CombinedLedger extends Fragment {
                 count++;
                 accounts.add(String.valueOf(count));
                 adapter.notifyDataSetChanged();
+            }
+        });
+
+        btnSubmit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                selectedAccounts = adapter.getSelectedAccounts();
+                selectedAccountsIndices = adapter.getSelectedAccountsIndies();
+
+                Log.d(getString(R.string.txtLogTag), "Selected Accounts:  " + selectedAccounts.size());
+                Log.d(getString(R.string.txtLogTag), "Selected Accounts Indices:  " + selectedAccountsIndices.size());
             }
         });
     }

@@ -29,9 +29,6 @@ import androidx.viewpager.widget.ViewPager;
 
 public class LedgerSelectActivity extends AppCompatActivity {
 
-    private ViewPager view_pager;
-    private TabLayout tab_layout;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,10 +50,10 @@ public class LedgerSelectActivity extends AppCompatActivity {
     }
 
     private void initComponent() {
-        view_pager = findViewById(R.id.view_pager);
+        ViewPager view_pager = findViewById(R.id.view_pager);
         setupViewPager(view_pager);
 
-        tab_layout = findViewById(R.id.tab_layout);
+        TabLayout tab_layout = findViewById(R.id.tab_layout);
         tab_layout.setupWithViewPager(view_pager);
     }
 

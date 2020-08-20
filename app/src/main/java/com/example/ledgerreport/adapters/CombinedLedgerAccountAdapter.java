@@ -17,11 +17,15 @@ public class CombinedLedgerAccountAdapter extends RecyclerView.Adapter<CombinedL
     private ArrayList<String> accounts;
     private LayoutInflater mInflater;
     private ArrayList<String> spinnerAccounts;
+    private ArrayList<String> selectedAccountsArray;
+    private ArrayList<Integer> selectedAccountsIndices;
 
     public CombinedLedgerAccountAdapter(Context context, ArrayList<String> accounts, ArrayList<String> spinnerAccounts) {
         this.mInflater = LayoutInflater.from(context);
         this.accounts = accounts;
         this.spinnerAccounts = spinnerAccounts;
+        selectedAccountsArray = new ArrayList<>();
+        selectedAccountsIndices = new ArrayList<>();
     }
 
     @Override
@@ -33,6 +37,14 @@ public class CombinedLedgerAccountAdapter extends RecyclerView.Adapter<CombinedL
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         holder.spinner.setItems(spinnerAccounts);
+
+        holder.spinner.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<String>() {
+            @Override
+            public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
+                selectedAccountsArray.add(item);
+                selectedAccountsIndices.add(position - 1);
+            }
+        });
     }
 
     @Override
@@ -46,5 +58,13 @@ public class CombinedLedgerAccountAdapter extends RecyclerView.Adapter<CombinedL
         ViewHolder(View itemView) {
             super(itemView);
         }
+    }
+
+    public ArrayList<String> getSelectedAccounts(){
+        return selectedAccountsArray;
+    }
+
+    public ArrayList<Integer> getSelectedAccountsIndies(){
+        return selectedAccountsIndices;
     }
 }

@@ -31,6 +31,7 @@ import com.example.ledgerreport.PDFDocumentAdapter;
 import com.example.ledgerreport.PdfViewActivity;
 import com.example.ledgerreport.R;
 import com.example.ledgerreport.Utils.CONST;
+import com.example.ledgerreport.Utils.MySharedPreference;
 import com.google.android.material.snackbar.Snackbar;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 
@@ -57,8 +58,6 @@ import static android.os.Environment.getExternalStorageDirectory;
 public class SingleLedger extends Fragment {
 
     int selectedIndex, loggedInUser;
-
-    SharedPreferences sharedPreference;
 
     MaterialSpinner spinner;
 
@@ -98,8 +97,7 @@ public class SingleLedger extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        sharedPreference = Objects.requireNonNull(getActivity()).getPreferences(Context.MODE_PRIVATE);
-        loggedInUser = sharedPreference.getInt(getString(R.string.prefKey), 0);
+        loggedInUser = new MySharedPreference(getContext()).getCompanyCode("companyCode");
 
         ledgerReportsList = new ArrayList<>();
         accounts = new ArrayList<>();
