@@ -19,6 +19,9 @@ public interface ApiInterface {
             @Query("TO_DATE") String TO_DATE
     );
 
+    @GET(CONST.READ_MULTIPLE_LEDGER_REPORT_DATA)
+    Call<List<LedgerReportModel>> getCombinedLedgerReportData(@Query("WhereClause") String WhereClause);
+
     @GET(CONST.USER_LOGIN)
     Call<List<UserLoginModel>> userLogin(
             @Query("Code") int Code,
