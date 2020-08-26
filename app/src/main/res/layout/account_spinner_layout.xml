@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <com.jaredrummler.materialspinner.MaterialSpinner
+    <com.toptoche.searchablespinnerlibrary.SearchableSpinner
         android:id="@+id/combinedLedgerSpinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

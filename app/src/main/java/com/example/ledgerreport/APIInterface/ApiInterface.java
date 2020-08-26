@@ -1,6 +1,7 @@
 package com.example.ledgerreport.APIInterface;
 import com.example.ledgerreport.Models.LedgerReportModel;
 import com.example.ledgerreport.Models.TbAccountsModel;
+import com.example.ledgerreport.Models.TrialBalanceModel;
 import com.example.ledgerreport.Models.UserLoginModel;
 import com.example.ledgerreport.Utils.CONST;
 import java.util.List;
@@ -31,4 +32,7 @@ public interface ApiInterface {
 
     @GET(CONST.READ_TBACCOUNTS)
     Call<List<TbAccountsModel>> getAllTbAccounts();
+
+    @GET(CONST.READ_TRIAL_BALANCE)
+    Call<List<TrialBalanceModel>> getTrialBalanceData(@Query("TO_DATE") String toDate);
 }

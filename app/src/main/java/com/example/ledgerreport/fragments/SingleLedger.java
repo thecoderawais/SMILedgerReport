@@ -4,14 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Typeface;
-import android.graphics.pdf.PdfDocument;
 import android.os.Bundle;
 import android.print.PrintAttributes;
 import android.print.PrintDocumentAdapter;
@@ -20,9 +12,16 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.Fragment;
 
 import com.example.ledgerreport.APIInterface.ApiInterface;
 import com.example.ledgerreport.Models.LedgerReportModel;
@@ -33,20 +32,23 @@ import com.example.ledgerreport.R;
 import com.example.ledgerreport.Utils.CONST;
 import com.example.ledgerreport.Utils.MySharedPreference;
 import com.google.android.material.snackbar.Snackbar;
-import com.jaredrummler.materialspinner.MaterialSpinner;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.element.Text;
+import com.itextpdf.layout.property.UnitValue;
+import com.toptoche.searchablespinnerlibrary.SearchableSpinner;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.Fragment;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -59,7 +61,7 @@ public class SingleLedger extends Fragment {
 
     int selectedIndex, loggedInUser;
 
-    MaterialSpinner spinner;
+    SearchableSpinner spinner;
 
     String fileName = "";
     List<LedgerReportModel> ledgerReportsList;
@@ -67,16 +69,17 @@ public class SingleLedger extends Fragment {
     private ArrayList<String> accounts;
     ApiInterface apiInterface;
 
-    Paint paint = new Paint(), titlePaint = new Paint();
-    Bitmap bmp, scaledBmp;
-    int pageWidth = 1200, rowYAxis = 760;
+//    Paint paint = new Paint(), titlePaint = new Paint();
+//    int pageWidth = 1200, rowYAxis = 760;
     Date dateObj;
 
-    PdfDocument doc = new PdfDocument();
-    PdfDocument.PageInfo pageInfo;
-    PdfDocument.Page page1;
+    PdfDocument pdfDoc;
+    Document doc;
 
-    Canvas canvas;
+    // The second argument determines 'large table' functionality is used
+    // It defines whether parts of the table will be written before all data is added.
+    Table table = new Table(UnitValue.createPercentArray(6), true);
+
     DatePicker fromDate, toDate;
     Button btnSubmit;
     int dayFrom, monthFrom, yearFrom, dayTo, monthTo, yearTo;
@@ -114,41 +117,49 @@ public class SingleLedger extends Fragment {
         fromDate = Objects.requireNonNull(getActivity()).findViewById(R.id.singleLedgerFromDate);
         toDate = Objects.requireNonNull(getActivity()).findViewById(R.id.singleLedgerToDate);
         btnSubmit = Objects.requireNonNull(getActivity()).findViewById(R.id.btnSubmit);
-        if (accounts.size() == 0)
-            spinner.setItems("Loading the Data...");
 
-        spinner.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<String>() {
+
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
-                selectedAccount = item;
-                selectedIndex = position - 1;
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                selectedAccount = adapterView.getItemAtPosition(i).toString();
+                selectedIndex = i - 1;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
             }
         });
 
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Processing Your Request, Please Wait........" + loggedInUser, Snackbar.LENGTH_LONG).show();
-                Log.d(getString(R.string.txtLogTag), "Starting the process...");
-                try {
+                if(!selectedAccount.equals(getString(R.string.select_any_item))){
+                    Snackbar.make(view, "Processing Your Request, Please Wait........" + loggedInUser, Snackbar.LENGTH_LONG).show();
+                    Log.d(getString(R.string.txtLogTag), "Starting the process...");
+                    try {
 
-                    dayFrom = fromDate.getDayOfMonth();
-                    monthFrom = fromDate.getMonth();
-                    yearFrom = fromDate.getYear();
+                        dayFrom = fromDate.getDayOfMonth();
+                        monthFrom = fromDate.getMonth();
+                        yearFrom = fromDate.getYear();
 
-                    dayTo = toDate.getDayOfMonth();
-                    monthTo = toDate.getMonth();
-                    yearTo = toDate.getYear();
+                        dayTo = toDate.getDayOfMonth();
+                        monthTo = toDate.getMonth();
+                        yearTo = toDate.getYear();
 
-                    String[] account = selectedAccount.split("--");
+                        String[] account = selectedAccount.split("--");
 
-                    from = yearFrom + "-" + monthFrom + "-" + dayFrom;
-                    to = yearTo + "-" + monthTo + "-" + dayTo;
+                        from = yearFrom + "-" + monthFrom + "-" + dayFrom;
+                        to = yearTo + "-" + monthTo + "-" + dayTo;
 
-                    getLedgerReportData(loggedInUser, account[1], account[0], from, to, view);
-                }catch (Exception e){
-                    Log.d(getString(R.string.txtLogTag), "Button Click Exception: " + e.getMessage());
-                    Snackbar.make(view, "Nothing Found!", Snackbar.LENGTH_LONG).show();
+                        getLedgerReportData(loggedInUser, account[1], account[0], from, to, view);
+                    }catch (Exception e){
+                        Log.d(getString(R.string.txtLogTag), "Button Click Exception: " + e.getMessage());
+                        Snackbar.make(view, "Nothing Found!", Snackbar.LENGTH_LONG).show();
+                    }
+                }else{
+                    Snackbar.make(view, "Please select the account.", Snackbar.LENGTH_LONG).show();
                 }
             }
         });
@@ -171,7 +182,9 @@ public class SingleLedger extends Fragment {
                                     for(TbAccountsModel item : response.body()){
                                         accounts.add(item.getAC_CODE() + " -- " + item.getAC_NAME());
                                     }
-                                    spinner.setItems(accounts);
+                                    ArrayAdapter<String> accountsArrayAdapter = new ArrayAdapter<>
+                                            (Objects.requireNonNull(getContext()),android.R.layout.simple_list_item_1,accounts);
+                                    spinner.setAdapter(accountsArrayAdapter);
                                     Log.d(getString(R.string.txtLogTag), "Set " + response.body().size() + " entries in Spinner");
                                 } else {
                                     Toast.makeText(getContext(), "No Accounts Found", Toast.LENGTH_SHORT).show();
@@ -223,7 +236,6 @@ public class SingleLedger extends Fragment {
                                 if (ledgerReportsList.size() > 0) {
                                     try {
 
-                                        ledgerReportsList.get(0).setOPENING_BALANCE(1503350);
                                         int balance = ledgerReportsList.get(0).getOPENING_BALANCE();
 
                                         //                    For updating all balances
@@ -233,15 +245,15 @@ public class SingleLedger extends Fragment {
                                             item.setBALANCE(balance);
                                         }
 
-                                        //
-                                        bmp = BitmapFactory.decodeResource(getResources(), R.drawable.logo);
-                                        scaledBmp = Bitmap.createScaledBitmap(bmp, 800, 350, false);
                                         dateObj = new Date();
+                                        fileName = getExternalStorageDirectory() +
+                                                "/LedgerReports/LedgerReport:" + ledgerReportsList.get(0).getAC_NAME() + ".pdf";
 
-                                        //Setting Pages
-                                        pageInfo = new PdfDocument.PageInfo.Builder(1200,2010,1).create();
-                                        page1 = doc.startPage(pageInfo);
-                                        canvas = page1.getCanvas();
+                                        File file = new File(fileName);
+                                        Objects.requireNonNull(file.getParentFile()).mkdirs();
+
+                                        pdfDoc = new PdfDocument(new PdfWriter(fileName));
+                                        doc = new Document(pdfDoc);
 
                                         Log.d(getString(R.string.txtLogTag), "Adding Report Top Items");
                                         addReportTopItems(accCode, accName, from, to, String.valueOf(ledgerReportsList.get(0).getOPENING_BALANCE()));
@@ -255,17 +267,20 @@ public class SingleLedger extends Fragment {
                                                 ledgerReportsList) {
                                             i++;
                                             Log.d(getString(R.string.txtLogTag), "Adding Row:" + i + " To Table");
+                                            if (i % 6 == 0){
+                                                Log.d(getString(R.string.txtLogTag), "Flushing Table");
+                                                table.flush();
+                                            }
                                             addRow(item);
                                         }
-                                        doc.finishPage(page1);
 
-                                        fileName = getExternalStorageDirectory() +
-                                                "/LedgerReports/LedgerReport:" + ledgerReportsList.get(0).getAC_NAME() + ".pdf";
-                                        File file = new File(fileName);
+                                        Log.d(getString(R.string.txtLogTag), "Completing table and closing Doc");
+
+                                        table.complete();
+                                        doc.close();
 
                                         try {
-                                            Log.d(getString(R.string.txtLogTag), "Saving File to : " + fileName);
-                                            doc.writeTo(new FileOutputStream(file));
+
                                             Log.d(getString(R.string.txtLogTag), "File Saved to: " + fileName + "Successfully!");
                                             Toast.makeText(getContext(),
                                                     "Saved! at " + fileName, Toast.LENGTH_SHORT).show();
@@ -351,26 +366,26 @@ public class SingleLedger extends Fragment {
     public void addReportTopItems(String acCode, String acName, String fromDate, String toDate, String balance)
     {
         try {
-            canvas.drawBitmap(scaledBmp, 0,0,paint);
-            //Add Title
-            titlePaint.setTextAlign(Paint.Align.CENTER);
-            titlePaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
-            titlePaint.setTextSize(70);
-            canvas.drawText("Ledger Report", pageWidth/2, 350, titlePaint);
+            Text title1 = new Text(new MySharedPreference(getContext()).getCompanyName("companyName")).setFontSize(22);
 
+            Text title2 = new Text(acCode).setFontSize(18);
+            Text title3 = new Text(acName).setFontSize(18);
+            Text title4 = new Text(fromDate).setFontSize(15);
+            Text title5 = new Text(toDate).setFontSize(15);
+            Text title6 = new Text(balance).setFontSize(16);
 
-            //Left Aligned Items
-            paint.setColor(Color.BLACK);
-            paint.setTextSize(35f);
-            paint.setTextAlign(Paint.Align.LEFT);
+            Paragraph p = new Paragraph().add(title1);
+            doc.add(p);
 
-            canvas.drawText(" Account Code: " + acCode, 20, 450, paint);
-            canvas.drawText(" Account Title: " + acName, 20, 525, paint);
-            canvas.drawText(" B/F: " + balance, 20, 590, paint);
-            canvas.drawText("From:   " + fromDate, 730, 450, paint);
-            canvas.drawText("To:        " + toDate, 730, 490, paint);
-            canvas.drawText("As On:  " + new SimpleDateFormat("E, dd-MMM-yyyy").format(dateObj), 730, 540, paint);
-            canvas.drawText("                         " + new SimpleDateFormat("hh:mm a").format(dateObj), 730, 590, paint);
+            p = new Paragraph().add(title2).add(":").add(title3);
+            doc.add(p);
+
+            p = new Paragraph().add("From ").add(title4).add(" To ").add(title5);
+            doc.add(p);
+
+            p = new Paragraph().add("B/F: ").add(title6);
+            doc.add(p);
+
         }catch (Exception e){
             Log.d(getString(R.string.txtLogTag), "addReportTopItems Exception: " + e.getMessage());
         }
@@ -381,16 +396,15 @@ public class SingleLedger extends Fragment {
     public void drawTable()
     {
         try {
-            paint.setTextAlign(Paint.Align.LEFT);
-            paint.setStyle(Paint.Style.FILL);
-            paint.setTextSize(40f);
-            paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
-            canvas.drawText("Date", 40, 680, paint);
-            canvas.drawText("V. #", 180, 680, paint);
-            canvas.drawText("Description", 280, 680, paint);
-            canvas.drawText("Debit", 620, 680, paint);
-            canvas.drawText("Credit", 820, 680, paint);
-            canvas.drawText("Balance", 1020, 680, paint);
+            table.addHeaderCell(new Cell().setKeepTogether(true).add(new Paragraph("Date")));
+            table.addHeaderCell(new Cell().setKeepTogether(true).add(new Paragraph("V. #")));
+            table.addHeaderCell(new Cell().setKeepTogether(true).add(new Paragraph("Description")));
+            table.addHeaderCell(new Cell().setKeepTogether(true).add(new Paragraph("Debit")));
+            table.addHeaderCell(new Cell().setKeepTogether(true).add(new Paragraph("Credit")));
+            table.addHeaderCell(new Cell().setKeepTogether(true).add(new Paragraph("Balance")));
+
+            // For the "large tables" they shall be added to the document before its child elements are populated
+            doc.add(table);
         }catch (Exception e){
             Log.d(getString(R.string.txtLogTag), "drawTable Exception: " + e.getMessage());
         }
@@ -398,51 +412,21 @@ public class SingleLedger extends Fragment {
 
     //Called each time for adding the row.
     @SuppressLint("SimpleDateFormat")
-    public void addRow(LedgerReportModel ledgerEntry)
+    public void addRow(LedgerReportModel item)
     {
-        if(rowYAxis <= 2000){ //If there is space left on the current page.
-            try {
-//            canvas.drawText(String.valueOf(ledgerEntry.getV_DATE()), 40, rowYAxis, paint); //Date
-                paint.setTextSize(30f);
-                paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
-                try {
-                    canvas.drawText(new SimpleDateFormat("dd-MM-yy").format(ledgerEntry.getV_DATE()), 40, rowYAxis, paint); //Date
-                }catch (Exception e){
-                    canvas.drawText("Date Error", 40, rowYAxis, paint); //Date
-                }
-                canvas.drawText(ledgerEntry.getV_NO(), 180, rowYAxis, paint); //V No
-                canvas.drawText(ledgerEntry.getDESCRIPTION(), 280, rowYAxis, paint); //Description
-                canvas.drawText(String.valueOf(ledgerEntry.getVDEBIT()), 620, rowYAxis, paint); //Debit
-                canvas.drawText(String.valueOf(ledgerEntry.getV_CREDIT()), 820, rowYAxis, paint); //Credit
-                canvas.drawText(String.valueOf(ledgerEntry.getBALANCE()), 1020, rowYAxis, paint); //Balance
+        table.addCell(new Cell().setKeepTogether(true).add(new Paragraph(new SimpleDateFormat("dd-MM-yy").format(item.getV_DATE()))
+                .setMargins(0, 0, 0, 0)));
+        table.addCell(new Cell().setKeepTogether(true).add(new Paragraph(item.getV_NO())
+                .setMargins(0, 0, 0, 0)));
+        table.addCell(new Cell().setKeepTogether(true).add(new Paragraph(item.getDESCRIPTION())
+                .setMargins(0, 0, 0, 0)));
+        table.addCell(new Cell().setKeepTogether(true).add(new Paragraph(String.valueOf(item.getVDEBIT()))
+                .setMargins(0, 0, 0, 0)));
+        table.addCell(new Cell().setKeepTogether(true).add(new Paragraph(String.valueOf(item.getV_CREDIT()))
+                .setMargins(0, 0, 0, 0)));
+        table.addCell(new Cell().setKeepTogether(true).add(new Paragraph(String.valueOf(item.getBALANCE()))
+                .setMargins(0, 0, 0, 0)));
 
-            }catch (Exception e){
-                Log.d(getString(R.string.txtLogTag), "Exception while adding Row: " + e.getMessage());
-            }
-        }else{ //If the page's height has been filled!
-            Log.d(getString(R.string.txtLogTag), "Finishing Prev. Page ");
-            doc.finishPage(page1);
-            Log.d(getString(R.string.txtLogTag), "Starting Next Page");
-            pageInfo = new PdfDocument.PageInfo.Builder(1200,2010,1).create();
-            page1 = doc.startPage(pageInfo);
-            canvas = page1.getCanvas();
-
-            rowYAxis = 150;
-
-            paint.setTextSize(30f);
-            paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
-            try {
-                canvas.drawText(new SimpleDateFormat("dd-MM-yy").format(ledgerEntry.getV_DATE()), 40, rowYAxis, paint); //Date
-            }catch (Exception e){
-                canvas.drawText("Date Error", 40, rowYAxis, paint); //Date
-            }
-            canvas.drawText(ledgerEntry.getV_NO(), 180, rowYAxis, paint); //V No
-            canvas.drawText(ledgerEntry.getDESCRIPTION(), 280, rowYAxis, paint); //Description
-            canvas.drawText(String.valueOf(ledgerEntry.getVDEBIT()), 620, rowYAxis, paint); //Debit
-            canvas.drawText(String.valueOf(ledgerEntry.getV_CREDIT()), 820, rowYAxis, paint); //Credit
-            canvas.drawText(String.valueOf(ledgerEntry.getBALANCE()), 1020, rowYAxis, paint); //Balance
-        }
-        rowYAxis += 80;
     }
 
     private void printPDF(String fileName) {

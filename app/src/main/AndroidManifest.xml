@@ -11,10 +11,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup">
-        <activity android:name=".LoginActivity"/>
+        <activity android:name=".LedgerSelectActivity"/>
         <activity android:name=".MainActivity" />
         <activity android:name=".PdfViewActivity" />
-        <activity android:name=".LedgerSelectActivity">
+        <activity android:name=".LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

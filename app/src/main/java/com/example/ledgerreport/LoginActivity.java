@@ -83,7 +83,7 @@ public class LoginActivity extends AppCompatActivity {
                             if (response.isSuccessful() && response.body() != null) {
                                 if (response.body().get(0).isActive()) {
                                     Intent intent = new Intent(LoginActivity.this, LedgerSelectActivity.class);
-                                    String companyName = response.body().get(0).getOwnerName();
+                                    String companyName = response.body().get(0).getCompanyName();
                                     intent.putExtra("CompanyName", companyName);
                                     Log.d(getString(R.string.txtLogTag), response.toString());
 

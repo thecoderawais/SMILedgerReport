@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".fragments.SingleLedger">
 
-    <com.jaredrummler.materialspinner.MaterialSpinner
+    <com.toptoche.searchablespinnerlibrary.SearchableSpinner
         android:id="@+id/singleLedgerSpinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -14,9 +14,11 @@
         android:layout_marginTop="5dp"
         android:layout_marginEnd="16dp"
         android:elevation="2dp"
+        app:hintText="@string/select_any_item"
+        android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+        app:layout_constraintTop_toBottomOf="@+id/textView"/>
 
     <TextView
         android:id="@+id/textView"

@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.Toast;
@@ -127,7 +128,10 @@ public class CombinedLedger extends Fragment {
         apiInterface = retrofit.create(ApiInterface.class);
         getAllAccounts();
         FloatingActionButton fab = Objects.requireNonNull(getActivity()).findViewById(R.id.floatingActionButton);
-        adapter = new CombinedLedgerAccountAdapter(getContext(), accounts, spinnerAccounts);
+        ArrayAdapter<String> accountsArrayAdapter = new ArrayAdapter<>
+                (Objects.requireNonNull(getContext()),android.R.layout.simple_list_item_1,accounts);
+
+        adapter = new CombinedLedgerAccountAdapter(getContext(), accountsArrayAdapter, spinnerAccounts);
         final RecyclerView recyclerView = Objects.requireNonNull(getActivity()).findViewById(R.id.combinedLedgerRecyclerView);
         recyclerView.setHasFixedSize(true);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
@@ -163,25 +167,31 @@ public class CombinedLedger extends Fragment {
                 selectedAccounts = adapter.getSelectedAccounts();
                 selectedAccountsIndices = adapter.getSelectedAccountsIndies();
 
+                Log.d(getString(R.string.txtLogTag), "Total " + count + " Items in RecyclerView");
                 Log.d(getString(R.string.txtLogTag), "Got " + selectedAccounts.size() + " Selected Accounts back...");
                 Log.d(getString(R.string.txtLogTag), "Showing Selected Accounts...");
 
-                whereClause = " WHERE AC_NO IN ( ";
-                int count = 1;
+                if(count == selectedAccounts.size()){
+                    whereClause = " WHERE AC_NO IN ( ";
+                    int count = 1;
 
-                for (String item :
-                        selectedAccounts) {
-                    Log.d(getString(R.string.txtLogTag), "Selected Accounts:  " + item);
-                    whereClause = whereClause.concat(item.split("--")[0]);
-                    selectedAccountNames.add(item.split("--")[1]);
-                    if (count <  selectedAccounts.size()){
-                        whereClause = whereClause.concat(", ");
+                    for (String item :
+                            selectedAccounts) {
+                        Log.d(getString(R.string.txtLogTag), "Selected Accounts:  " + item);
+                        whereClause = whereClause.concat(item.split("--")[0]);
+                        selectedAccountNames.add(item.split("--")[1]);
+                        if (count <  selectedAccounts.size()){
+                            whereClause = whereClause.concat(", ");
+                        }
+                        count++;
                     }
-                    count++;
-                }
-                whereClause = whereClause.concat(") AND V_DATE BETWEEN '" + from + "' AND '" + to + "' ORDER BY AC_NO");
+                    whereClause = whereClause.concat(") AND V_DATE BETWEEN '" + from + "' AND '" + to + "' ORDER BY AC_NO");
 
-                getLedgerReportData(whereClause, view);
+                    getLedgerReportData(whereClause, view);
+                }else{
+                    Snackbar.make(view, "Please Select all Accounts. Added: " + count +
+                            ". Found: " + selectedAccounts.size(), Snackbar.LENGTH_LONG).show();
+                }
             }
         });
     }

@@ -4,11 +4,15 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 
 import com.example.ledgerreport.R;
 import com.jaredrummler.materialspinner.MaterialSpinner;
+import com.toptoche.searchablespinnerlibrary.SearchableSpinner;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -16,16 +20,19 @@ public class CombinedLedgerAccountAdapter extends RecyclerView.Adapter<CombinedL
 
     private ArrayList<String> accounts;
     private LayoutInflater mInflater;
-    private ArrayList<String> spinnerAccounts;
     private ArrayList<String> selectedAccountsArray;
     private ArrayList<Integer> selectedAccountsIndices;
+    ArrayAdapter<String> accountsArrayAdapter;
 
-    public CombinedLedgerAccountAdapter(Context context, ArrayList<String> accounts, ArrayList<String> spinnerAccounts) {
+
+    public CombinedLedgerAccountAdapter(Context context, ArrayAdapter<String> accountsArrayAdapter,
+                                        ArrayList<String> accounts) {
         this.mInflater = LayoutInflater.from(context);
         this.accounts = accounts;
-        this.spinnerAccounts = spinnerAccounts;
+        this.accountsArrayAdapter = accountsArrayAdapter;
         selectedAccountsArray = new ArrayList<>();
         selectedAccountsIndices = new ArrayList<>();
+
     }
 
     @Override
@@ -36,25 +43,28 @@ public class CombinedLedgerAccountAdapter extends RecyclerView.Adapter<CombinedL
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        holder.spinner.setItems(spinnerAccounts);
 
-        holder.spinner.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<String>() {
+        holder.spinner.setAdapter(accountsArrayAdapter);
+
+        holder.spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
-                int index = holder.getLayoutPosition();
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                int index = holder.getAdapterPosition();
 
                 if(selectedAccountsArray.size() >= index + 1){
-                    selectedAccountsArray.set(index, item);
+                    selectedAccountsArray.set(index, adapterView.getItemAtPosition(i).toString());
                     selectedAccountsIndices.set(index, index);
                 }else{
-                    selectedAccountsArray.add(item);
+                    selectedAccountsArray.add(adapterView.getItemAtPosition(i).toString());
                     selectedAccountsIndices.add(index);
                 }
-                accounts.remove(item);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
             }
         });
-
-
     }
 
     @Override
@@ -64,7 +74,7 @@ public class CombinedLedgerAccountAdapter extends RecyclerView.Adapter<CombinedL
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        MaterialSpinner spinner = itemView.findViewById(R.id.combinedLedgerSpinner);
+        SearchableSpinner spinner = itemView.findViewById(R.id.combinedLedgerSpinner);
         ViewHolder(View itemView) {
             super(itemView);
         }

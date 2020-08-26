@@ -31,4 +31,9 @@ public class MySharedPreference {
         return prefs.getInt(key, 0);
     }
 
+    public String getCompanyName(String key) {
+        SharedPreferences prefs = context.getSharedPreferences(FAV_PREFS_KEY, Context.MODE_PRIVATE);
+        return prefs.getString(key, "");
+    }
+
 }

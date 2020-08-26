@@ -25,4 +25,6 @@
     <string name="pref">LRPref</string>
     <string name="prefKey">loginKey</string>
     <string name="select_any_item">Select any Item...</string>
+    <string name="txtLastDate">Last Date:</string>
+    <string name="txtSubmit">Submit</string>
 </resources>
