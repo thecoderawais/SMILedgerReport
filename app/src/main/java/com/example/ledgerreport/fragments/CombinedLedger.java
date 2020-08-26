@@ -129,9 +129,9 @@ public class CombinedLedger extends Fragment {
         getAllAccounts();
         FloatingActionButton fab = Objects.requireNonNull(getActivity()).findViewById(R.id.floatingActionButton);
         ArrayAdapter<String> accountsArrayAdapter = new ArrayAdapter<>
-                (Objects.requireNonNull(getContext()),android.R.layout.simple_list_item_1,accounts);
+                (Objects.requireNonNull(getContext()),android.R.layout.simple_list_item_1,spinnerAccounts);
 
-        adapter = new CombinedLedgerAccountAdapter(getContext(), accountsArrayAdapter, spinnerAccounts);
+        adapter = new CombinedLedgerAccountAdapter(getContext(), accountsArrayAdapter, accounts);
         final RecyclerView recyclerView = Objects.requireNonNull(getActivity()).findViewById(R.id.combinedLedgerRecyclerView);
         recyclerView.setHasFixedSize(true);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
