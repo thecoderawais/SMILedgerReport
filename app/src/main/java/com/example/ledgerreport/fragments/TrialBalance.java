@@ -5,14 +5,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
 import com.example.ledgerreport.APIInterface.ApiInterface;
-import com.example.ledgerreport.Models.TbAccountsModel;
 import com.example.ledgerreport.Models.TrialBalanceModel;
 import com.example.ledgerreport.R;
 import com.example.ledgerreport.Utils.CONST;
@@ -26,11 +27,6 @@ import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.element.Text;
 import com.itextpdf.layout.property.UnitValue;
-import com.toptoche.searchablespinnerlibrary.SearchableSpinner;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -56,8 +52,6 @@ public class TrialBalance extends Fragment {
     String to = "", fileName;
     PdfDocument pdfDoc;
     Document doc;
-
-    SearchableSpinner spinner;
 
     // The second argument determines 'large table' functionality is used
     // It defines whether parts of the table will be written before all data is added.
@@ -89,11 +83,7 @@ public class TrialBalance extends Fragment {
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
-        spinner = view.findViewById(R.id.searchableSpinner);
-
         apiInterface = retrofit.create(ApiInterface.class);
-
-        getAllAccounts();
 
         toDate = view.findViewById(R.id.trialBalanceToDate);
         btnSubmitTrialBalance = view.findViewById(R.id.btnSubmitTrialBalance);
@@ -109,20 +99,6 @@ public class TrialBalance extends Fragment {
             to = yearTo + "-" + monthTo + "-" + dayTo;
 
             getTrialBalanceData(to, view);
-            }
-        });
-
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                Toast.makeText(getContext(), adapterView.getItemAtPosition(i).toString(), Toast.LENGTH_SHORT).show();
-                Log.d(getString(R.string.txtLogTag), "onItemSelected: " +
-                        adapterView.getItemAtPosition(i).toString());
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
             }
         });
     }
@@ -155,7 +131,7 @@ public class TrialBalance extends Fragment {
                                         "/TrialBalances/TrialBalance Till " + to + ".pdf";
 
                                 File file = new File(fileName);
-                                file.getParentFile().mkdirs();
+                                Objects.requireNonNull(file.getParentFile()).mkdirs();
 
                                 pdfDoc = new PdfDocument(new PdfWriter(fileName));
                                 doc = new Document(pdfDoc);
@@ -246,51 +222,4 @@ public class TrialBalance extends Fragment {
                 .setMargins(0, 0, 0, 0)));
     }
 
-
-
-    public void getAllAccounts(){
-        Call<List<TbAccountsModel>> call = apiInterface.getAllTbAccounts();
-        if (call != null) {
-            try {
-                call.enqueue(new Callback<List<TbAccountsModel>>() {
-                    @Override
-                    public void onResponse(Call<List<TbAccountsModel>> call, Response<List<TbAccountsModel>> response) {
-                        try {
-                            if (response.isSuccessful() && response.body() != null) {
-                                Log.d(getString(R.string.txtLogTag), "Response Successful! Entries: " + response.body().size());
-                                if (response.body().size() > 0) {
-//                                    Toast.makeText(getContext(), "Login Successful", Toast.LENGTH_SHORT).show();
-                                    ArrayList<String> accounts = new ArrayList<>();
-                                    for(TbAccountsModel item : response.body()){
-                                        accounts.add(item.getAC_CODE() + " -- " + item.getAC_NAME());
-                                    }
-                                    ArrayAdapter<String> accountsArrayAdapter = new ArrayAdapter<>
-                                            (Objects.requireNonNull(getContext()),android.R.layout.simple_list_item_1,accounts);
-                                    spinner.setAdapter(accountsArrayAdapter);
-                                    Log.d(getString(R.string.txtLogTag), "Set " + response.body().size() + " entries in Spinner");
-                                } else {
-                                    Toast.makeText(getContext(), "No Accounts Found", Toast.LENGTH_SHORT).show();
-                                }
-                            } else {
-                                Toast.makeText(getContext(), "Response was not successful!", Toast.LENGTH_SHORT).show();
-                                Log.d(getString(R.string.txtLogTag), "Response was not successful!" + response.message() );
-                            }
-                        } catch (Exception e) {
-                            Log.d(getString(R.string.txtLogTag), "Error while getting User's info: " + e.getMessage());
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<List<TbAccountsModel>> call, Throwable t) {
-                        Log.d(getString(R.string.txtLogTag), "onFailure: " + t.getMessage());
-
-                    }
-                });
-            } catch (Exception e) {
-                Log.d(getString(R.string.txtLogTag), "LedgerReportData Getting Exception: " + e.getMessage());
-            }
-        } else {
-            Log.d(getString(R.string.txtLogTag), "Call was null");
-        }
-    }
 }

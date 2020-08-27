@@ -7,14 +7,12 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.ledgerreport.R;
-import com.jaredrummler.materialspinner.MaterialSpinner;
 import com.toptoche.searchablespinnerlibrary.SearchableSpinner;
 
 import java.util.ArrayList;
-import java.util.Objects;
-
-import androidx.recyclerview.widget.RecyclerView;
 
 public class CombinedLedgerAccountAdapter extends RecyclerView.Adapter<CombinedLedgerAccountAdapter.ViewHolder> {
 

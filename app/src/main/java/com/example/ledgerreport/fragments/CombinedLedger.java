@@ -146,7 +146,7 @@ public class CombinedLedger extends Fragment {
             public void onClick(View view) {
                 count++;
                 accounts.add(String.valueOf(count));
-                adapter.notifyDataSetChanged();
+                adapter.notifyItemInserted(count);
             }
         });
 
