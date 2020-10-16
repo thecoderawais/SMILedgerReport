@@ -5,11 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Typeface;
-import android.graphics.pdf.PdfDocument;
 import android.os.Bundle;
 import android.print.PrintAttributes;
 import android.print.PrintDocumentAdapter;
@@ -30,12 +25,24 @@ import com.example.ledgerreport.PDFDocumentAdapter;
 import com.example.ledgerreport.PdfViewActivity;
 import com.example.ledgerreport.R;
 import com.example.ledgerreport.Utils.CONST;
+import com.example.ledgerreport.Utils.MySharedPreference;
 import com.example.ledgerreport.adapters.CombinedLedgerAccountAdapter;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.AreaBreak;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.element.Text;
+import com.itextpdf.layout.property.TextAlignment;
+import com.itextpdf.layout.property.UnitValue;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -58,7 +65,13 @@ import static android.os.Environment.getExternalStorageDirectory;
 
 public class CombinedLedger extends Fragment {
 
-    int loggedInUser, currentAccountIndex, pages= 1;
+    Table table = new Table(UnitValue.createPercentArray(6), true);
+
+
+    PdfDocument pdfDoc;
+    Document doc;
+
+    int loggedInUser, currentAccountIndex;
 
     SharedPreferences sharedPreference;
 
@@ -77,16 +90,9 @@ public class CombinedLedger extends Fragment {
     private ArrayList<String> spinnerAccounts;
     private ApiInterface apiInterface;
 
-    Paint paint = new Paint(), titlePaint = new Paint();
-    int pageWidth = 1200, rowYAxis = 420;
     Date dateObj;
 //    DateFormat format;
 
-    PdfDocument doc = new PdfDocument();
-    PdfDocument.PageInfo pageInfo;
-    PdfDocument.Page page1;
-
-    Canvas canvas;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -275,21 +281,29 @@ public class CombinedLedger extends Fragment {
 
                                             Log.d(getString(R.string.txtLogTag), "Setting Page");
 
-                                            //Setting Pages
-                                            pageInfo = new PdfDocument.PageInfo.Builder(1200,2010,1).create();
-                                            page1 = doc.startPage(pageInfo);
-                                            canvas = page1.getCanvas();
+                                            fileName = getExternalStorageDirectory() +
+                                                    "/LedgerReports/LedgerReport:" + ledgerReportsList.get(0).getAC_NAME() + ".pdf";
+
+                                            File file = new File(fileName);
+                                            Objects.requireNonNull(file.getParentFile()).mkdirs();
+
+                                            pdfDoc = new com.itextpdf.kernel.pdf.PdfDocument(new PdfWriter(fileName));
+                                            doc = new Document(pdfDoc);
 
                                             Log.d(getString(R.string.txtLogTag), "Adding Report Top Items");
                                             addReportTopItems(from, to);
 
                                             Log.d(getString(R.string.txtLogTag), "Drawing Table......");
-                                            drawTable(350);
+                                            drawTable();
 
                                             currentAccountIndex = 0;
                                             currentAccount = selectedAccountNames.get(currentAccountIndex);
-                                            addAccountHeading(currentAccount, "15000", rowYAxis);
-                                            rowYAxis += 120;
+                                            addAccountHeading(currentAccount, "15000");
+
+                                            // attach a file to FileWriter
+                                            FileWriter fw=new FileWriter( getExternalStorageDirectory() +
+                                                    "/Outputs/output.txt");
+
                                             Log.d(getString(R.string.txtLogTag), "Starting to add Rows...");
                                             int i = 0;
                                             for (LedgerReportModel item :
@@ -297,16 +311,18 @@ public class CombinedLedger extends Fragment {
                                                 i++;
                                                 Log.d(getString(R.string.txtLogTag), "Adding Row:" + i + " To Table");
                                                 addRow(item);
-                                            }
-                                            doc.finishPage(page1);
 
-                                            fileName = getExternalStorageDirectory() +
-                                                    "/LedgerReports/LedgerReport:" + ledgerReportsList.get(0).getAC_NAME() + ".pdf";
-                                            File file = new File(fileName);
+                                                fw.write("Acc: " + item.getAC_NAME() + item.getV_DATE() + " BAL: " + item.getBALANCE() + " \n");
+                                            }
+
+                                            fw.close();
 
                                             try {
                                                 Log.d(getString(R.string.txtLogTag), "Saving File to : " + fileName);
-                                                doc.writeTo(new FileOutputStream(file));
+
+                                                table.complete();
+                                                doc.close();
+
                                                 Log.d(getString(R.string.txtLogTag), "File Saved to: " + fileName + "Successfully!");
                                                 Toast.makeText(getContext(),
                                                         "Saved! at " + fileName, Toast.LENGTH_SHORT).show();
@@ -394,64 +410,104 @@ public class CombinedLedger extends Fragment {
     @SuppressLint("SimpleDateFormat")
     public void addReportTopItems(String fromDate, String toDate)
     {
+//        try {
+//            //Add Title
+//            titlePaint.setTextAlign(Paint.Align.CENTER);
+//            titlePaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+//            titlePaint.setTextSize(70);
+//            canvas.drawText("Combined Ledger Report", pageWidth/2, 50, titlePaint);
+//
+//
+//            paint.setColor(Color.BLACK);
+//            paint.setTextSize(35f);
+//            paint.setTextAlign(Paint.Align.LEFT);
+//
+//            canvas.drawText(" From:   " + fromDate, 20, 150, paint);
+//            canvas.drawText(" To:        " + toDate, 20, 225, paint);
+//            canvas.drawText(" As On:  " + new SimpleDateFormat("E, dd-MMM-yyyy").format(dateObj), 730, 150, paint);
+//            canvas.drawText("                          " + new SimpleDateFormat("hh:mm a").format(dateObj), 730, 225, paint);
+//        }catch (Exception e){
+//            Log.d(getString(R.string.txtLogTag), "addReportTopItems Exception: " + e.getMessage());
+//        }
         try {
-            //Add Title
-            titlePaint.setTextAlign(Paint.Align.CENTER);
-            titlePaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
-            titlePaint.setTextSize(70);
-            canvas.drawText("Combined Ledger Report", pageWidth/2, 50, titlePaint);
+            Text title1 = new Text(new MySharedPreference(getContext()).
+                    getCompanyName("companyName")).setFontSize(24).setBold().setUnderline()
+                    .setTextAlignment(TextAlignment.CENTER);
 
+            Text title4 = new Text(fromDate).setFontSize(15);
+            Text title5 = new Text(toDate).setFontSize(15);
 
-            paint.setColor(Color.BLACK);
-            paint.setTextSize(35f);
-            paint.setTextAlign(Paint.Align.LEFT);
+            Paragraph p = new Paragraph().add(title1);
+            doc.add(p);
 
-            canvas.drawText(" From:   " + fromDate, 20, 150, paint);
-            canvas.drawText(" To:        " + toDate, 20, 225, paint);
-            canvas.drawText(" As On:  " + new SimpleDateFormat("E, dd-MMM-yyyy").format(dateObj), 730, 150, paint);
-            canvas.drawText("                          " + new SimpleDateFormat("hh:mm a").format(dateObj), 730, 225, paint);
+            p = new Paragraph().add("Combined Ledger").setFontSize(20).setTextAlignment(TextAlignment.CENTER);
+            doc.add(p);
+
+            p = new Paragraph().add("From ").add(title4).add(" To ").add(title5);
+            doc.add(p);
+
         }catch (Exception e){
             Log.d(getString(R.string.txtLogTag), "addReportTopItems Exception: " + e.getMessage());
         }
-
     }
 
-    public void addAccountHeading(String accName, String balance, int yAxis)
+    public void addAccountHeading(String accName, String balance)
     {
+//        try {
+//            Log.d(getString(R.string.txtLogTag), "Adding new Account Heading: " + accName);
+//            //Add Title
+//            titlePaint.setTextAlign(Paint.Align.LEFT);
+//            titlePaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+//            titlePaint.setTextSize(45);
+//            canvas.drawText("Acc: " + accName, 20, yAxis, titlePaint);
+//
+//
+//            paint.setColor(Color.BLACK);
+//            paint.setTextSize(35f);
+//            paint.setTextAlign(Paint.Align.LEFT);
+//
+//            canvas.drawText(" Balance: " + balance, 730, yAxis, paint);
+//        }catch (Exception e){
+//            Log.d(getString(R.string.txtLogTag), "addAccountHeadingError Exception: " + e.getMessage());
+//        }
         try {
-            Log.d(getString(R.string.txtLogTag), "Adding new Account Heading: " + accName);
-            //Add Title
-            titlePaint.setTextAlign(Paint.Align.LEFT);
-            titlePaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
-            titlePaint.setTextSize(45);
-            canvas.drawText("Acc: " + accName, 20, yAxis, titlePaint);
 
+            Paragraph p = new Paragraph().add("Acc: " + accName).setFontSize(15).setTextAlignment(TextAlignment.LEFT)
+                    .add("B/F: " + balance).setFontSize(15).setTextAlignment(TextAlignment.RIGHT);
+            doc.add(p);
 
-            paint.setColor(Color.BLACK);
-            paint.setTextSize(35f);
-            paint.setTextAlign(Paint.Align.LEFT);
-
-            canvas.drawText(" Balance: " + balance, 730, yAxis, paint);
         }catch (Exception e){
-            Log.d(getString(R.string.txtLogTag), "addAccountHeadingError Exception: " + e.getMessage());
+            Log.d(getString(R.string.txtLogTag), "addAccountHeading Exception: " + e.getMessage());
         }
-
     }
 
     //Drawing the table
-    public void drawTable(int yAxis)
+    public void drawTable()
     {
+//        try {
+//            paint.setTextAlign(Paint.Align.LEFT);
+//            paint.setStyle(Paint.Style.FILL);
+//            paint.setTextSize(40f);
+//            paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+//            canvas.drawText("Date", 40, yAxis, paint);
+//            canvas.drawText("V. #", 180, yAxis, paint);
+//            canvas.drawText("Description", 280, yAxis, paint);
+//            canvas.drawText("Debit", 620, yAxis, paint);
+//            canvas.drawText("Credit", 820, yAxis, paint);
+//            canvas.drawText("Balance", 1020, yAxis, paint);
+//        }catch (Exception e){
+//            Log.d(getString(R.string.txtLogTag), "drawTable Exception: " + e.getMessage());
+//        }
         try {
-            paint.setTextAlign(Paint.Align.LEFT);
-            paint.setStyle(Paint.Style.FILL);
-            paint.setTextSize(40f);
-            paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
-            canvas.drawText("Date", 40, yAxis, paint);
-            canvas.drawText("V. #", 180, yAxis, paint);
-            canvas.drawText("Description", 280, yAxis, paint);
-            canvas.drawText("Debit", 620, yAxis, paint);
-            canvas.drawText("Credit", 820, yAxis, paint);
-            canvas.drawText("Balance", 1020, yAxis, paint);
+            table.addHeaderCell(new Cell().setKeepTogether(true).add(new Paragraph("Date")));
+            table.addHeaderCell(new Cell().setKeepTogether(true).add(new Paragraph("V. #")));
+            table.addHeaderCell(new Cell().setKeepTogether(true).add(new Paragraph("Description")));
+            table.addHeaderCell(new Cell().setKeepTogether(true).add(new Paragraph("Debit")));
+            table.addHeaderCell(new Cell().setKeepTogether(true).add(new Paragraph("Credit")));
+            table.addHeaderCell(new Cell().setKeepTogether(true).add(new Paragraph("Balance")));
+
+            // For the "large tables" they shall be added to the document before its child elements are populated
+            doc.add(table);
         }catch (Exception e){
             Log.d(getString(R.string.txtLogTag), "drawTable Exception: " + e.getMessage());
         }
@@ -459,81 +515,30 @@ public class CombinedLedger extends Fragment {
 
     //Called each time for adding the row.
     @SuppressLint("SimpleDateFormat")
-    public void addRow(LedgerReportModel ledgerEntry)
+    public void addRow(LedgerReportModel item)
     {
-        if(rowYAxis <= 2000){ //If there is space left on the current page.
-            try {
-//            canvas.drawText(String.valueOf(ledgerEntry.getV_DATE()), 40, rowYAxis, paint); //Date
-
-                if (currentAccount.equals(ledgerEntry.getAC_NAME())){
-                    paint.setTextSize(30f);
-                    paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
-                    try {
-                        canvas.drawText(new SimpleDateFormat("dd-MM-yy").format(ledgerEntry.getV_DATE()), 40, rowYAxis, paint); //Date
-                    }catch (Exception e){
-                        canvas.drawText("Date Error", 40, rowYAxis, paint); //Date
-                    }
-                    canvas.drawText(ledgerEntry.getV_NO(), 180, rowYAxis, paint); //V No
-                    canvas.drawText(ledgerEntry.getDESCRIPTION(), 280, rowYAxis, paint); //Description
-                    canvas.drawText(String.valueOf(ledgerEntry.getVDEBIT()), 620, rowYAxis, paint); //Debit
-                    canvas.drawText(String.valueOf(ledgerEntry.getV_CREDIT()), 820, rowYAxis, paint); //Credit
-                    canvas.drawText(String.valueOf(ledgerEntry.getBALANCE()), 1020, rowYAxis, paint); //Balance
-                }else{
-                    currentAccountIndex++;
-                    currentAccount = selectedAccountNames.get(currentAccountIndex);
-                    addAccountHeading(currentAccount, "15000", rowYAxis);
-                    rowYAxis += 120;
-
-                    drawTable(rowYAxis);
-                    rowYAxis += 80;
-
-                    paint.setTextSize(30f);
-                    paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
-                    try {
-                        canvas.drawText(new SimpleDateFormat("dd-MM-yy").format(ledgerEntry.getV_DATE()), 40, rowYAxis, paint); //Date
-                    }catch (Exception e){
-                        canvas.drawText("Date Error", 40, rowYAxis, paint); //Date
-                    }
-                    canvas.drawText(ledgerEntry.getV_NO(), 180, rowYAxis, paint); //V No
-                    canvas.drawText(ledgerEntry.getDESCRIPTION(), 280, rowYAxis, paint); //Description
-                    canvas.drawText(String.valueOf(ledgerEntry.getVDEBIT()), 620, rowYAxis, paint); //Debit
-                    canvas.drawText(String.valueOf(ledgerEntry.getV_CREDIT()), 820, rowYAxis, paint); //Credit
-                    canvas.drawText(String.valueOf(ledgerEntry.getBALANCE()), 1020, rowYAxis, paint); //Balance
-                }
-
-            }catch (Exception e){
-                Log.d(getString(R.string.txtLogTag), "Exception while adding Row: " + e.getMessage());
-            }
-        }else{ //If the page's height has been filled!
-            Log.d(getString(R.string.txtLogTag), "Finishing Prev. Page ");
-
-            paint.setTextSize(30f);
-            paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
-            canvas.drawText("Page: " + pages, 180, rowYAxis, paint); //V No
-            pages++;
-            doc.finishPage(page1);
-            Log.d(getString(R.string.txtLogTag), "Starting Next Page");
-            pageInfo = new PdfDocument.PageInfo.Builder(1200,2010,1).create();
-            page1 = doc.startPage(pageInfo);
-            canvas = page1.getCanvas();
-
-            rowYAxis = 150;
-
-            drawTable(rowYAxis);
-            rowYAxis += 80;
-
-            try {
-                canvas.drawText(new SimpleDateFormat("dd-MM-yy").format(ledgerEntry.getV_DATE()), 40, rowYAxis, paint); //Date
-            }catch (Exception e){
-                canvas.drawText("Date Error", 40, rowYAxis, paint); //Date
-            }
-            canvas.drawText(ledgerEntry.getV_NO(), 180, rowYAxis, paint); //V No
-            canvas.drawText(ledgerEntry.getDESCRIPTION(), 280, rowYAxis, paint); //Description
-            canvas.drawText(String.valueOf(ledgerEntry.getVDEBIT()), 620, rowYAxis, paint); //Debit
-            canvas.drawText(String.valueOf(ledgerEntry.getV_CREDIT()), 820, rowYAxis, paint); //Credit
-            canvas.drawText(String.valueOf(ledgerEntry.getBALANCE()), 1020, rowYAxis, paint); //Balance
+        if (!item.getAC_NAME().equals(currentAccount)) {
+            doc.add(table);
+            doc.add(new AreaBreak());
+            currentAccountIndex++;
+            currentAccount = selectedAccountNames.get(currentAccountIndex);
+            addAccountHeading(currentAccount, "15000");
+            table = new Table(UnitValue.createPercentArray(6), true);
+            drawTable();
         }
-        rowYAxis += 80;
+
+        table.addCell(new Cell().setKeepTogether(true).add(new Paragraph(new SimpleDateFormat("dd-MM-yy").format(item.getV_DATE()))
+                .setMargins(0, 0, 0, 0)));
+        table.addCell(new Cell().setKeepTogether(true).add(new Paragraph(item.getV_NO())
+                .setMargins(0, 0, 0, 0)));
+        table.addCell(new Cell().setKeepTogether(true).add(new Paragraph(item.getDESCRIPTION())
+                .setMargins(0, 0, 0, 0)));
+        table.addCell(new Cell().setKeepTogether(true).add(new Paragraph(String.valueOf(item.getVDEBIT()))
+                .setMargins(0, 0, 0, 0)));
+        table.addCell(new Cell().setKeepTogether(true).add(new Paragraph(String.valueOf(item.getV_CREDIT()))
+                .setMargins(0, 0, 0, 0)));
+        table.addCell(new Cell().setKeepTogether(true).add(new Paragraph(String.valueOf(item.getBALANCE()))
+                .setMargins(0, 0, 0, 0)));
     }
 
     private void printPDF(String fileName) {

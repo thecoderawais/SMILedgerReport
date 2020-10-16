@@ -261,7 +261,7 @@ public class SingleLedger extends Fragment {
                                         Log.d(getString(R.string.txtLogTag), "Drawing Table......");
                                         drawTable();
 
-                                        Log.d(getString(R.string.txtLogTag), "Adding Report Top Items");
+                                        Log.d(getString(R.string.txtLogTag), "Starting to Add Rows");
                                         int i = 0;
                                         for (LedgerReportModel item :
                                                 ledgerReportsList) {
